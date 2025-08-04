@@ -38,6 +38,8 @@
 	"dependencies": {
 		"culori": "^4.0.2",
 		"hsluv-ts": "^1.0.1",
+		"svelte-5-french-toast": "^2.0.4",
+		"svelte-copy": "^2.0.0",
 		"values.js": "^2.1.1"
 	}
 }
