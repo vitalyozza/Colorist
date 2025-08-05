@@ -45,17 +45,17 @@ export class OKLCHColor {
 
 	// Методы изменения свойств с ограничениями
 	modifyLightness(delta: number): OKLCHColor {
-		this.lightness = Math.max(0, Math.min(100, this.lightness + delta));
+		this.lightness = Math.max(0, Math.min(100, this.lightness.toFixed(2) + delta)).toFixed(2);
 		return this;
 	}
 
 	modifyChroma(delta: number): OKLCHColor {
-		this.chroma = Math.max(0, this.chroma + delta);
+		this.chroma = Math.max(0, this.chroma.toFixed(2) + delta).toFixed(2);
 		return this;
 	}
 
 	modifyHue(delta: number): OKLCHColor {
-		this.hue = (this.hue + delta + 360) % 360;
+		this.hue = ((this.hue.toFixed(2) + delta + 360) % 360).toFixed(2);
 		return this;
 	}
 

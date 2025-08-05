@@ -1,23 +1,28 @@
 <script lang="ts">
-    import { copy } from 'svelte-copy';
-    import toast, {Toaster} from 'svelte-5-french-toast'
 
-    let { color = $bindable() } = $props();
+    let uid = $props.id()
+    let { color = $bindable(), selected = $bindable(null) } = $props();
 
-    function handleClick(message) {
-		toast.success(`Copied: ${message}`)
+    function selectColor(color) {
+        selected = color
 	}
 
-    console.log($state.snapshot(color.tints))
+    
 
 </script>
 
-<div class="color-column font-mono">
+<div class="color-column font-mono" id="column-{uid}">
+    <div class="color-hue" onclick={() => selectColor(color)}>
+        <div 
+            class="color-hue-cover" 
+            style="background-color: {color.toCssString()};">
+        </div>
+        <span>H{color.hue}</span>
+    </div>
     <div class="color-units">
         {#each color.tints as tint}
             <div class="color-unit" style="background: {tint.toCssString()}" 
-                use:copy={tint.toCssString()}
-                onclick={() => handleClick(tint.toCssString())}
+                onclick={() => selectColor(tint)}
             >
                 <span class={ tint.lightness < 55 ? "text-white" : ""}>
                     l: {tint.lightness.toFixed(2)} <br>
@@ -28,22 +33,39 @@
     </div>
 </div>
 
-<Toaster />
-
 <style>
+
     .color-column {
         flex: 1;
 		display: flex;
 		flex-direction: column;
 		min-width: 100px;
+        transition: filter 0.3s, opacity 0.3s;
     }
 
-    .color-hue input {
-        width: 100%;
-        height: 32px;
-        border: 1px solid #000;
-        background-color: #333;
+    .color-hue {
+        background-color: #000;
+        padding: 4px 8px;
+        color: #ccc;
+        gap: 6px;
+        font-size: 12px;
+        display: flex;
+        flex-direction: row;
+        justify-content: start;
+        align-items: center;
+    }
+
+    .color-hue:hover {
+        background-color: #111;
+        cursor: pointer;
         color: white;
+    }
+
+    .color-hue-cover {
+        width: 16px;
+        height: 16px;
+        border-radius: 6px;
+        border: 1px solid #00000020;
     }
 
     .color-units {
