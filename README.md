@@ -1,6 +1,7 @@
 # Colorist
 
 Quick way to generate oklch palettes and export them to CSS Variables.
+
 Supported export to Figma with HEX values.
 
 ## Developing
