@@ -3,6 +3,7 @@
 	import OKLCHColorSpector from '$lib/components/OKLCHColorSpector.svelte';
 	import ColorActions from '$lib/components/ColorActions.svelte';
 	import { OKLCHColor } from '$lib/classes/OKLCHColor/index.svelte';
+	import { copy } from 'svelte-copy';
 
 	let { data }: PageProps = $props();
 
@@ -28,6 +29,33 @@
 	);
 
 	let selectedColor = $state(null);
+
+	// Quick Bulk Export
+	let exportAllCSSVariables = (format: string = "oklch") => {
+
+		let prefix = `/* Collection name: Generated Palettes */`;
+
+		let allVariables = ""
+
+		colors.forEach((color) => {
+			const variables = color.tints
+				.map((tint) => {
+					return `    --${color.getSanitizeColorName()}-${100-tint.lightness.toFixed()}: ${tint.toCssString(format)};`;
+				})
+				.join('\n');
+			allVariables = allVariables + '\n' + variables;
+		})
+
+		return `${prefix}\n:root {\n${allVariables}\n}`;
+	}
+
+	let exportedAllCSSVariables = $derived(
+		exportAllCSSVariables()
+	);
+
+	let exportedAllFigmaVariables = $derived(
+		exportAllCSSVariables("hex")
+	);
 
 </script>
 
@@ -59,6 +87,20 @@
 			class="cursor-pointer appearance-none rounded-lg bg-orange-500 accent-orange-400 dark:bg-zinc-800"
 			bind:value={paletteLength}
 		/>
+	</div>
+	<div>
+		<button
+			class="text-white ml-8 cursor-pointer" 
+			use:copy={exportedAllCSSVariables}
+		>
+			Export to CSS
+		</button>
+		<button 
+			class="text-white ml-8 cursor-pointer" 
+			use:copy={exportedAllFigmaVariables}
+		>
+			Export to Figma
+		</button>
 	</div>
 </div>
 
@@ -99,4 +141,7 @@
 		width: 100%;
 		height: calc(100vh - 72px);
 	}
+
+	
+
 </style>

@@ -110,6 +110,13 @@ export class OKLCHColor {
 		return nearest(this.getHex()).name;
 	}
 
+	getSanitizeColorName(): string {
+		return String(this.getColorName())
+			.toLowerCase().replace(/[\s'"\/\\]/g, '-')
+			.replace(/-+/g, '-')  // Заменяем множественные тире на одно
+			.replace(/^-|-$/g, ''); // Удаляем тире в начале и конце
+	}
+
 	getHex(): string {
 		const oklchColor = { 
 			mode: 'oklch', 

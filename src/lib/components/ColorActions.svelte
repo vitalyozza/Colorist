@@ -12,7 +12,7 @@
 
 		const variables = color.tints
 			.map((tint) => {
-				return `    --${String(color.getColorName()).replace(/\s/g, '-')}-${100-tint.lightness.toFixed()}: ${tint.toCssString()};`;
+				return `    --${color.getSanitizeColorName()}-${100-tint.lightness.toFixed()}: ${tint.toCssString()};`;
 			})
 			.join('\n');
 
@@ -29,7 +29,7 @@
 
 		const variables = color.tints
 			.map((tint) => {
-				return `    --${String(color.getColorName()).replace(/\s/g, '-')}-${100-tint.lightness.toFixed()}: ${tint.toCssString('hex')};`;
+				return `    --${color.getSanitizeColorName()}-${100-tint.lightness.toFixed()}: ${tint.toCssString('hex')};`;
 			})
 			.join('\n');
 
@@ -110,21 +110,3 @@
 		{/if}
 	</div>
 </div>
-
-<style>
-/* Collection name: Generated Palettes */
-:root {
-    --Hulk-5: oklch(95.0% 0.10 144.0);
-    --Hulk-14: oklch(85.6% 0.10 144.0);
-    --Hulk-24: oklch(76.1% 0.10 144.0);
-    --Hulk-33: oklch(66.7% 0.12 144.0);
-    --Hulk-43: oklch(57.2% 0.16 144.0);
-    --Hulk-52: oklch(47.8% 0.20 144.0);
-    --Hulk-62: oklch(38.3% 0.16 144.0);
-    --Hulk-71: oklch(28.9% 0.12 144.0);
-    --Hulk-81: oklch(19.4% 0.10 144.0);
-    --Hulk-90: oklch(10.0% 0.10 144.0);
-
-/* Hulk = oklch(50.0% 0.20 144.0) */
-}
-</style>
