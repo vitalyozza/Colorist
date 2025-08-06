@@ -65,7 +65,7 @@
 		colors.forEach((color) => {
 			const variables = color.tints
 				.map((tint) => {
-					return `${tint.toCssString(format)},	/* ${color.getSanitizeColorName()}-${100-tint.lightness.toFixed()} */ \n`;
+					return `'${tint.toCssString(format)}',	/* ${color.getSanitizeColorName()}-${100-tint.lightness.toFixed()} */`;
 				})
 				.join('\n');
 			allValues = allValues + '\n' + variables;
