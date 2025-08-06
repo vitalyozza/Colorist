@@ -1,4 +1,9 @@
+import { oklch, formatHex } from 'culori';
+import nearestColor from 'nearest-color';
+import { colornames } from 'color-name-list';
+
 export class OKLCHColor {
+	name: string = "Unknown Color"
 	lightness: number;
 	chroma: number;
 	hue: number;
@@ -12,6 +17,7 @@ export class OKLCHColor {
 		tints: boolean = false,
 		shades: boolean = false
 	) {
+
 		// Поддержка двух типов входных данных
 		if (typeof oklchString === 'string') {
 			const parts = oklchString
@@ -41,6 +47,7 @@ export class OKLCHColor {
         if (shades) {
             this.shades = this.generateShades(paletteLength - halfPaletteLength);
         }
+
 	}
 
 	// Методы изменения свойств с ограничениями
@@ -96,8 +103,35 @@ export class OKLCHColor {
 		return Math.max(minChroma, Math.min(maxChroma, chromaticness));
 	}
 
-	// Преобразование обратно в CSS-строку
-	toCssString(): string {
+	getColorName(hex: string): string {
+		const colors = colornames.reduce((o, { name, hex }) => Object.assign(o, { [name]: hex }), {});
+
+		const nearest = nearestColor.from(colors);
+		return nearest(this.getHex()).name;
+	}
+
+	getHex(): string {
+		const oklchColor = { 
+			mode: 'oklch', 
+			l: this.lightness / 100,
+			c: this.chroma, 
+			h: this.hue 
+		};
+		return formatHex(oklch(oklchColor));
+	}
+
+	getOklch(): string {
 		return `oklch(${this.lightness.toFixed(1)}% ${this.chroma.toFixed(2)} ${this.hue.toFixed(1)})`;
+	} 
+
+	// Преобразование обратно в CSS-строку
+	toCssString(format:string = 'oklch'): string {
+
+		if (format == 'oklch') {
+			return this.getOklch()
+		} else {
+			return this.getHex()
+		}
 	}
 }
+

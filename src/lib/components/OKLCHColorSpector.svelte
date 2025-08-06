@@ -12,12 +12,12 @@
 </script>
 
 <div class="color-column font-mono" id="column-{uid}">
-    <div class="color-hue" onclick={() => selectColor(color)}>
+    <div class="color-hue" title={color.getColorName()} onclick={() => selectColor(color)}>
         <div 
             class="color-hue-cover" 
             style="background-color: {color.toCssString()};">
         </div>
-        <span>H{color.hue}</span>
+        <span>H{color.hue} </span><br><span class="truncate">{color.getColorName()}</span>
     </div>
     <div class="color-units">
         {#each color.tints as tint}
@@ -62,9 +62,9 @@
     }
 
     .color-hue-cover {
-        width: 16px;
-        height: 16px;
-        border-radius: 6px;
+        width:8px;
+        height: 8px;
+        border-radius: 8px;
         border: 1px solid #00000020;
     }
 

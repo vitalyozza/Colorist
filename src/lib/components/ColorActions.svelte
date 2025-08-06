@@ -1,79 +1,130 @@
 <script>
-    import { copy } from 'svelte-copy';
+	import { copy } from 'svelte-copy';
 
-    let { selectedColor = $bindable() } = $props()
+	let { selectedColor = $bindable() } = $props();
 
-    let generateTintsCssVariables = (color) => {
-        if (!color.tints && color.tints.length > 0) return '';
-        
-        const variables = color.tints.map((tint) => {
-            return `    --color-L${tint.lightness.toFixed()}: ${tint.toCssString()};`;
-        }).join('\n');
+	let generateTintsCssVariables = (color) => {
+		if (!color.tints && color.tints.length > 0) return '';
 
-        return `.color {\n${variables}\n}`;
-    }
+		let prefix = `/* Collection name: Generated Palettes */`;
 
-    let tintsCssVariables = $derived(selectedColor.tints 
-        ? generateTintsCssVariables(selectedColor) 
-        : '');
+		let suffix = `/* ${color.getColorName()} = ${color.toCssString()} */`;
+
+		const variables = color.tints
+			.map((tint) => {
+				return `    --${String(color.getColorName()).replace(/\s/g, '-')}-${100-tint.lightness.toFixed()}: ${tint.toCssString()};`;
+			})
+			.join('\n');
+
+		return `${prefix}\n:root {\n${variables}\n\n${suffix}\n}`;
+	};
+
+	let generateTintsFigmaCssVariables = (color) => {
+
+		if (!color.tints && color.tints.length > 0) return '';
+
+		let prefix = `/* Collection name: Generated Palettes */`;
+
+		let suffix = `/* ${color.getColorName()} = ${color.toCssString()} */`;
+
+		const variables = color.tints
+			.map((tint) => {
+				return `    --${String(color.getColorName()).replace(/\s/g, '-')}-${100-tint.lightness.toFixed()}: ${tint.toCssString('hex')};`;
+			})
+			.join('\n');
+
+		return `${prefix}\n:root {\n${variables}\n\n${suffix}\n}`;
+	};
+
+	let tintsCssVariables = $derived(
+		selectedColor.tints ? generateTintsCssVariables(selectedColor) : ''
+	);
+
+	let tintsFigmaCssVariables = $derived(
+		selectedColor.tints ? generateTintsFigmaCssVariables(selectedColor) : ''
+	);
 </script>
 
-<div class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 w-100">
-    <div class="bg-neutral-900/95 backdrop-blur-xl rounded-xl shadow-xl p-4 space-y-4 relative">
+<div class="fixed bottom-16 left-1/2 z-50 w-100 -translate-x-1/2">
+	<div class="relative space-y-4 rounded-xl bg-neutral-900/95 p-4 shadow-xl backdrop-blur-xl">
+		<div class="flex items-center space-x-3">
+			<div
+				class="h-8 w-8 rounded-lg shadow-md"
+				style="background-color: {selectedColor.toCssString()}"
+			></div>
+			<div class="flex-grow overflow-hidden">
+				<div class="truncate font-mono text-xs text-white">
+					{selectedColor.toCssString()}
+				</div>
+			</div>
+			<button
+				class="group cursor-pointer rounded-full p-2 text-white transition-colors hover:bg-neutral-700/50"
+				use:copy={selectedColor.toCssString()}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-5 w-5 group-hover:text-white"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+					/>
+				</svg>
+			</button>
+		</div>
 
-        <div class="flex items-center space-x-3">
-            <div 
-                class="w-8 h-8 rounded-lg shadow-md" 
-                style="background-color: {selectedColor.toCssString()}"
-            ></div>
-            <div class="flex-grow overflow-hidden">
-                <div class="text-white font-mono text-xs truncate">
-                    {selectedColor.toCssString()}
-                </div>
-            </div>
-            <button 
-                class="text-white hover:bg-neutral-700/50 p-2 rounded-full transition-colors group cursor-pointer" 
-                use:copy={selectedColor.toCssString()}
-            >
-                <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    class="h-5 w-5 group-hover:text-white" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor"
-                >
-                    <path 
-                        stroke-linecap="round" 
-                        stroke-linejoin="round" 
-                        stroke-width="2" 
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" 
-                    />
-                </svg>
-            </button>
-        </div>
-
-        {#if selectedColor.tints && selectedColor.tints.length > 0}
-            <div class="border-t border-neutral-700/30 pt-2">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="text-white text-xs opacity-70">Tints</div>
-                    <button 
-                        class="text-white text-xs hover:bg-neutral-700/50 px-2 py-1 rounded-md transition-colors group" 
-                        use:copy={tintsCssVariables}
-                    >
-                        <span class="group-hover:text-white opacity-70 cursor-pointer">Copy CSS</span>
-                    </button>
-                </div>
-                <div class="grid grid-cols-6 gap-2">
-                    {#each selectedColor.tints as tint}
-                        <div 
-                            class="w-auto h-8 rounded-lg shadow-md" 
-                            style="background-color: {tint.toCssString()}"
-                            title={tint.toCssString()}
-                        ></div>
-                    {/each}
-                </div>
-            </div>
-        {/if}
-    </div>
+		{#if selectedColor.tints && selectedColor.tints.length > 0}
+			<div class="border-t border-neutral-700/30 pt-2">
+				<div class="mb-2 flex items-center justify-between">
+					<div class="text-xs text-white opacity-70">Tints</div>
+					<div>
+						<button
+							class="group rounded-md px-2 py-1 text-xs text-white transition-colors hover:bg-neutral-700/50"
+							use:copy={tintsFigmaCssVariables}
+						>
+							<span class="cursor-pointer opacity-70 group-hover:text-white">Copy to Figma</span>
+						</button>
+						<button
+							class="group rounded-md px-2 py-1 text-xs text-white transition-colors hover:bg-neutral-700/50"
+							use:copy={tintsCssVariables}
+						>
+							<span class="cursor-pointer opacity-70 group-hover:text-white">Copy CSS</span>
+						</button>
+					</div>
+				</div>
+				<div class="grid grid-cols-6 gap-2">
+					{#each selectedColor.tints as tint}
+						<div
+							class="h-8 w-auto rounded-lg shadow-md"
+							style="background-color: {tint.toCssString()}"
+							title={tint.toCssString()}
+						></div>
+					{/each}
+				</div>
+			</div>
+		{/if}
+	</div>
 </div>
 
+<style>
+/* Collection name: Generated Palettes */
+:root {
+    --Hulk-5: oklch(95.0% 0.10 144.0);
+    --Hulk-14: oklch(85.6% 0.10 144.0);
+    --Hulk-24: oklch(76.1% 0.10 144.0);
+    --Hulk-33: oklch(66.7% 0.12 144.0);
+    --Hulk-43: oklch(57.2% 0.16 144.0);
+    --Hulk-52: oklch(47.8% 0.20 144.0);
+    --Hulk-62: oklch(38.3% 0.16 144.0);
+    --Hulk-71: oklch(28.9% 0.12 144.0);
+    --Hulk-81: oklch(19.4% 0.10 144.0);
+    --Hulk-90: oklch(10.0% 0.10 144.0);
+
+/* Hulk = oklch(50.0% 0.20 144.0) */
+}
+</style>
