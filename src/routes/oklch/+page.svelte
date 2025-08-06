@@ -30,7 +30,7 @@
 
 	let selectedColor = $state(null);
 
-	// Quick Bulk Export
+	// Quick Bulk Export Variables
 	let exportAllCSSVariables = (format: string = "oklch") => {
 
 		let prefix = `/* Collection name: Generated Palettes */`;
@@ -56,6 +56,29 @@
 	let exportedAllFigmaVariables = $derived(
 		exportAllCSSVariables("hex")
 	);
+
+	// Quick Bulk Export to values to use in array
+	let exportAllIntoArray = (format: string = "oklch") => {
+
+		let allValues = ""
+
+		colors.forEach((color) => {
+			const variables = color.tints
+				.map((tint) => {
+					return `${tint.toCssString(format)},	/* ${color.getSanitizeColorName()}-${100-tint.lightness.toFixed()} */ \n`;
+				})
+				.join('\n');
+			allValues = allValues + '\n' + variables;
+		})
+
+		return allValues;
+	}
+
+	let exportedAllIntoArray = $derived(
+		exportAllIntoArray("oklch")
+	);
+
+
 
 </script>
 
@@ -93,13 +116,19 @@
 			class="text-white ml-8 cursor-pointer" 
 			use:copy={exportedAllCSSVariables}
 		>
-			Export to CSS
+			🪄 to CSS
 		</button>
 		<button 
 			class="text-white ml-8 cursor-pointer" 
 			use:copy={exportedAllFigmaVariables}
 		>
-			Export to Figma
+			🪄 to Figma
+		</button>
+		<button 
+			class="text-white ml-8 cursor-pointer" 
+			use:copy={exportedAllIntoArray}
+		>
+			🪄 to Array
 		</button>
 	</div>
 </div>
