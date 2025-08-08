@@ -1,4 +1,4 @@
-import { oklch, formatHex } from 'culori';
+import { oklch, formatHex8, formatHex } from 'culori';
 import nearestColor from 'nearest-color';
 import { colornames } from 'color-name-list';
 
@@ -7,16 +7,33 @@ export class OKLCHColor {
 	lightness: number;
 	chroma: number;
 	hue: number;
+	alpha: number = 1; 
 	tints: OKLCHColor[] = [];
 	shades: OKLCHColor[] = [];
+	semitransparents: OKLCHColor[] = []
 	paletteLength: number;
 
 	constructor(
-		oklchString: string | { lightness: number; chroma: number; hue: number },
-		paletteLength: number = 10,
-		tints: boolean = false,
-		shades: boolean = false
+		oklchString: string | { 
+			lightness: number; 
+			chroma: number; 
+			hue: number,
+			alpha?: number
+		},
+		options: {
+			paletteLength?: number,
+            generateTints?: boolean,
+            generateShades?: boolean,
+            generateSemitransparent?: boolean
+		} = {}
 	) {
+		
+		const {
+            paletteLength = 10,
+            generateTints = false,
+            generateShades = false,
+            generateSemitransparent = false
+        } = options;
 
 		// Поддержка двух типов входных данных
 		if (typeof oklchString === 'string') {
@@ -29,24 +46,32 @@ export class OKLCHColor {
 			this.lightness = parseFloat(parts[0]);
 			this.chroma = parseFloat(parts[1]);
 			this.hue = parseFloat(parts[2]);
+
+			// Если указан альфа-канал
+			if (parts[3]) {
+				this.alpha = parseFloat(parts[3]);
+			}
 		} else {
 			this.lightness = oklchString.lightness;
 			this.chroma = oklchString.chroma;
 			this.hue = oklchString.hue;
+			this.alpha = oklchString.alpha ?? 1; // Значение по умолчанию
 		}
 
-		// Разделение paletteLength поровну между tints и shades
-        const halfPaletteLength = Math.floor(paletteLength / 2);
         this.paletteLength = paletteLength;
 
         // Генерация оттенков без рекурсивного вызова конструктора
-        if (tints) {
-            this.tints = this.generateTints(halfPaletteLength);
+        if (generateTints) {
+            this.tints = this.generateTints();
         }
 
-        if (shades) {
-            this.shades = this.generateShades(paletteLength - halfPaletteLength);
+        if (generateShades) {
+            this.shades = this.generateShades();
         }
+
+		if (generateSemitransparent) {
+			this.semitransparents = this.generateAlpha()
+		}
 
 	}
 
@@ -61,6 +86,12 @@ export class OKLCHColor {
 		return this;
 	}
 
+	// Метод для изменения прозрачности
+    modifyAlpha(delta: number): OKLCHColor {
+        this.alpha = Math.max(0, Math.min(1, this.alpha + delta));
+        return this;
+    }
+
 	modifyHue(delta: number): OKLCHColor {
 		this.hue = ((this.hue.toFixed(2) + delta + 360) % 360).toFixed(2);
 		return this;
@@ -70,11 +101,17 @@ export class OKLCHColor {
 		return Array.from({ length: this.paletteLength }, (_, step) => {
 			const lightness = 95 - (step / (this.paletteLength - 1)) * 85; // От 95% до 10%
 			const chroma = this.calculateChroma(step, true);
-			return new OKLCHColor({
-				lightness,
-				chroma,
-				hue: this.hue
-			});
+			let generatedColor = $state(
+				new OKLCHColor({
+					lightness,
+					chroma,
+					hue: this.hue
+				}, {
+					generateSemitransparent: true
+				})
+			);
+			
+			return generatedColor
 		});
 	}
 
@@ -82,11 +119,31 @@ export class OKLCHColor {
 		return Array.from({ length: this.paletteLength }, (_, step) => {
 			const lightness = 50 - (step / (this.paletteLength - 1)) * 40; // От 50% до 10%
 			const chroma = this.calculateChroma(step, false);
-			return new OKLCHColor({
-				lightness,
-				chroma,
-				hue: this.hue
-			});
+
+			let generatedColor = $state(
+				new OKLCHColor({
+					lightness,
+					chroma,
+					hue: this.hue
+				})
+			);
+			
+			return generatedColor
+		});
+	}
+
+	generateAlpha(): OKLCHColor[] {
+		return Array.from({ length: this.paletteLength }, (_, step) => {
+			const alpha = 10 + (step / (this.paletteLength - 1)) * 90; // От 10% до 100%
+			let generatedColor = $state(
+				new OKLCHColor({
+					lightness: this.lightness,
+					chroma: this.chroma,
+					hue: this.hue,
+					alpha: alpha / 100 // Преобразование процентов в десятичную дробь
+				})
+			)
+			return generatedColor
 		});
 	}
 
@@ -107,7 +164,19 @@ export class OKLCHColor {
 		const colors = colornames.reduce((o, { name, hex }) => Object.assign(o, { [name]: hex }), {});
 
 		const nearest = nearestColor.from(colors);
-		return nearest(this.getHex()).name;
+		return nearest(this.getHEX()).name;
+	}
+
+	getCSSVariableName(namespace: string = this.getSanitizeColorName()): string {
+		return `--${namespace}-${100-this.lightness.toFixed()}${this.getAlphaForCSSVariable()}`;
+	}
+
+	getAlphaForCSSVariable(): string {
+		if (this.alpha > 0 && this.alpha < 1) {
+			return `-A${this.alpha*100}`
+		} else {
+			return ``
+		}
 	}
 
 	getSanitizeColorName(): string {
@@ -117,28 +186,48 @@ export class OKLCHColor {
 			.replace(/^-|-$/g, ''); // Удаляем тире в начале и конце
 	}
 
-	getHex(): string {
+	getHEX(): string {
 		const oklchColor = { 
 			mode: 'oklch', 
 			l: this.lightness / 100,
 			c: this.chroma, 
-			h: this.hue 
+			h: this.hue,
+			alpha: this.alpha
 		};
 		return formatHex(oklch(oklchColor));
 	}
 
+	getHEXA(): string {
+		const oklchColor = { 
+			mode: 'oklch', 
+			l: this.lightness / 100,
+			c: this.chroma, 
+			h: this.hue,
+			alpha: this.alpha
+		};
+		return formatHex8(oklch(oklchColor));
+	}
+
 	getOklch(): string {
-		return `oklch(${this.lightness.toFixed(1)}% ${this.chroma.toFixed(2)} ${this.hue.toFixed(1)})`;
-	} 
+        return `oklch(${this.lightness.toFixed(1)}% ${this.chroma.toFixed(2)} ${this.hue.toFixed(1)} / ${(this.alpha * 100).toFixed(1)}%)`;
+    }
 
 	// Преобразование обратно в CSS-строку
-	toCssString(format:string = 'oklch'): string {
+	toCSSValue(format:string = 'oklch'): string {
 
 		if (format == 'oklch') {
 			return this.getOklch()
 		} else {
-			return this.getHex()
+			return this.getHEXA()
 		}
+	}
+
+	toCSSVariable(format:string = 'oklch', namespace?: string): string {
+		return this.getCSSVariableName(namespace) + `: ` + this.toCSSValue(format) + `;`
+	}
+
+	toArrayItem(format:string = 'oklch', namespace?: string): string {
+		return `'`+this.toCSSValue(format)+`', /*`+this.getCSSVariableName(namespace)+`*/`
 	}
 }
 

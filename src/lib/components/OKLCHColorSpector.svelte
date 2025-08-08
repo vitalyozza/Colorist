@@ -1,32 +1,30 @@
 <script lang="ts">
 
-    let uid = $props.id()
     let { color = $bindable(), selected = $bindable(null) } = $props();
 
     function selectColor(color) {
         selected = color
 	}
 
-    
-
 </script>
 
-<div class="color-column font-mono" id="column-{uid}">
+<div class="color-column font-mono">
     <div class="color-hue" title={color.getColorName()} onclick={() => selectColor(color)}>
         <div 
             class="color-hue-cover" 
-            style="background-color: {color.toCssString()};">
+            style="background-color: {color.toCSSValue()};">
         </div>
         <span>H{color.hue} </span><br><span class="truncate">{color.getColorName()}</span>
     </div>
     <div class="color-units">
         {#each color.tints as tint}
-            <div class="color-unit" style="background: {tint.toCssString()}" 
+            <div class="color-unit" style="background: {tint.toCSSValue()}" 
                 onclick={() => selectColor(tint)}
             >
                 <span class={ tint.lightness < 55 ? "text-white" : ""}>
                     l: {tint.lightness.toFixed(2)} <br>
-                    c: {tint.chroma.toFixed(2)}
+                    c: {tint.chroma.toFixed(2)} <br>
+                    a: {tint.alpha}
                 </span>
             </div>
         {/each}

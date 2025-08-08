@@ -1,89 +1,90 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
 	import OKLCHColorSpector from '$lib/components/OKLCHColorSpector.svelte';
 	import ColorActions from '$lib/components/ColorActions.svelte';
 	import { OKLCHColor } from '$lib/classes/OKLCHColor/index.svelte';
-	import { copy } from 'svelte-copy';
 
-	let { data }: PageProps = $props();
-
-	let hueRange = $state(20);
+	let hueRange = $state(2);
 	let paletteLength = $state(10);
 
 	let generatedColors = $derived.by(() => {
 		const result: string[] = [];
-		let hueStep = 360 / hueRange
+		let hueStep = 360 / hueRange;
 
-		for (let hue = 0; hue < 360;) {
+		for (let hue = 0; hue < 360; ) {
 			const oklchString = `oklch(50% 0.2 ${hue.toFixed()})`;
 			result.push(oklchString);
-			$inspect(hue, hueStep)
-			hue += hueStep
+			hue += hueStep;
 		}
 
 		return result;
 	});
 
 	let colors = $derived(
-		generatedColors.map((color) => new OKLCHColor(color, paletteLength, true, true))
+		generatedColors.map(
+			(color) =>
+				new OKLCHColor(color, {
+					paletteLength: paletteLength,
+					generateTints: true,
+					generateSemitransparent: true
+				})
+		)
 	);
 
 	let selectedColor = $state(null);
 
-	// Quick Bulk Export Variables
-	let exportAllCSSVariables = (format: string = "oklch") => {
-
+	let copyCSSCode = () => {
 		let prefix = `/* Collection name: Generated Palettes */`;
 
-		let allVariables = ""
+		let allLines = '';
 
 		colors.forEach((color) => {
-			const variables = color.tints
-				.map((tint) => {
-					return `    --${color.getSanitizeColorName()}-${100-tint.lightness.toFixed()}: ${tint.toCssString(format)};`;
-				})
-				.join('\n');
-			allVariables = allVariables + '\n' + variables;
-		})
+			color.tints.forEach((tint) => {
+				allLines = allLines + `	` + tint.toCSSVariable("oklch", color.getSanitizeColorName()) + `\n`;
+				tint.semitransparents.forEach((semi) => {
+					allLines = allLines + `	` + semi.toCSSVariable("oklch", color.getSanitizeColorName()) + `\n`;
+				});
+			});
+		});
 
-		return `${prefix}\n:root {\n${allVariables}\n}`;
-	}
+		console.log(`${prefix}\n:root {\n${allLines}\n}`)
+	};
 
-	let exportedAllCSSVariables = $derived(
-		exportAllCSSVariables()
-	);
+	let copyFigmaCode = () => {
+		let prefix = `/* Collection name: Generated Palettes */`;
 
-	let exportedAllFigmaVariables = $derived(
-		exportAllCSSVariables("hex")
-	);
-
-	// Quick Bulk Export to values to use in array
-	let exportAllIntoArray = (format: string = "oklch") => {
-
-		let allValues = ""
+		let allLines = '';
 
 		colors.forEach((color) => {
-			const variables = color.tints
-				.map((tint) => {
-					return `'${tint.toCssString(format)}',	/* ${color.getSanitizeColorName()}-${100-tint.lightness.toFixed()} */`;
-				})
-				.join('\n');
-			allValues = allValues + '\n' + variables;
-		})
+			color.tints.forEach((tint) => {
+				allLines = allLines + `	` + tint.toCSSVariable("hex", color.getSanitizeColorName()) + `\n`;
+				tint.semitransparents.forEach((semi) => {
+					allLines = allLines + `	` + semi.toCSSVariable("hex", color.getSanitizeColorName()) + `\n`;
+				});
+			});
+		});
 
-		return allValues;
-	}
+		console.log(`${prefix}\n:root {\n${allLines}\n}`)
+	};
 
-	let exportedAllIntoArray = $derived(
-		exportAllIntoArray("oklch")
-	);
+	let copyArray = () => {
 
+		let allLines = '';
 
+		colors.forEach((color) => {
+			color.tints.forEach((tint) => {
+				allLines = allLines + `	` + tint.toArrayItem("oklch", color.getSanitizeColorName()) + `\n`;
+				tint.semitransparents.forEach((semi) => {
+					allLines = allLines + `	` + semi.toArrayItem("oklch", color.getSanitizeColorName()) + `\n`;
+				});
+			});
+		});
 
+		console.log(allLines)
+	};
 </script>
 
 {#if selectedColor}
-	<ColorActions {selectedColor} />
+	<ColorActions bind:selectedColor={selectedColor} />
 {/if}
 
 <div class="header-section bg-zinc-900">
@@ -91,7 +92,7 @@
 		Colorist <span class="text-orange-400">oklch</span>
 	</div>
 	<div class="slider font-mono">
-		<span class="ml-24 text-s text-orange-500">Spectr</span>
+		<span class="text-s ml-24 text-orange-500">Spectr</span>
 		<input
 			type="number"
 			min="0"
@@ -101,7 +102,7 @@
 			bind:value={hueRange}
 		/>
 
-		<span class="ml-8 text-s text-orange-500">Tints</span>
+		<span class="text-s ml-8 text-orange-500">Tints</span>
 		<input
 			type="number"
 			min="3"
@@ -112,22 +113,13 @@
 		/>
 	</div>
 	<div>
-		<button
-			class="text-white ml-8 cursor-pointer" 
-			use:copy={exportedAllCSSVariables}
-		>
+		<button class="ml-8 cursor-pointer text-white" onclick={() => copyCSSCode()}>
 			🪄 to CSS
 		</button>
-		<button 
-			class="text-white ml-8 cursor-pointer" 
-			use:copy={exportedAllFigmaVariables}
-		>
+		<button class="ml-8 cursor-pointer text-white" onclick={() => copyFigmaCode()}>
 			🪄 to Figma
 		</button>
-		<button 
-			class="text-white ml-8 cursor-pointer" 
-			use:copy={exportedAllIntoArray}
-		>
+		<button class="ml-8 cursor-pointer text-white" onclick={() => copyArray()}>
 			🪄 to Array
 		</button>
 	</div>
@@ -140,7 +132,6 @@
 </div>
 
 <style>
-
 	.header-section {
 		display: flex;
 		justify-content: start;
@@ -170,7 +161,4 @@
 		width: 100%;
 		height: calc(100vh - 72px);
 	}
-
-	
-
 </style>
