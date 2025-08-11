@@ -5,6 +5,7 @@
 
 	let hueRange = $state(2);
 	let paletteLength = $state(10);
+	let exportOpacity = $state(false);
 
 	let generatedColors = $derived.by(() => {
 		const result: string[] = [];
@@ -40,9 +41,11 @@
 		colors.forEach((color) => {
 			color.tints.forEach((tint) => {
 				allLines = allLines + `	` + tint.toCSSVariable("oklch", color.getSanitizeColorName()) + `\n`;
-				tint.semitransparents.forEach((semi) => {
-					allLines = allLines + `	` + semi.toCSSVariable("oklch", color.getSanitizeColorName()) + `\n`;
-				});
+				if (exportOpacity) {
+					tint.semitransparents.forEach((semi) => {
+						allLines = allLines + `	` + semi.toCSSVariable("oklch", color.getSanitizeColorName()) + `\n`;
+					});
+				}
 			});
 		});
 
@@ -57,9 +60,11 @@
 		colors.forEach((color) => {
 			color.tints.forEach((tint) => {
 				allLines = allLines + `	` + tint.toCSSVariable("hex", color.getSanitizeColorName()) + `\n`;
-				tint.semitransparents.forEach((semi) => {
-					allLines = allLines + `	` + semi.toCSSVariable("hex", color.getSanitizeColorName()) + `\n`;
-				});
+				if (exportOpacity) {
+					tint.semitransparents.forEach((semi) => {
+						allLines = allLines + `	` + semi.toCSSVariable("hex", color.getSanitizeColorName()) + `\n`;
+					});
+				}
 			});
 		});
 
@@ -73,14 +78,17 @@
 		colors.forEach((color) => {
 			color.tints.forEach((tint) => {
 				allLines = allLines + `	` + tint.toArrayItem("oklch", color.getSanitizeColorName()) + `\n`;
-				tint.semitransparents.forEach((semi) => {
-					allLines = allLines + `	` + semi.toArrayItem("oklch", color.getSanitizeColorName()) + `\n`;
-				});
+				if (exportOpacity) {
+					tint.semitransparents.forEach((semi) => {
+						allLines = allLines + `	` + semi.toArrayItem("oklch", color.getSanitizeColorName()) + `\n`;
+					});	
+				}
 			});
 		});
 
 		console.log(allLines)
 	};
+
 </script>
 
 {#if selectedColor}
@@ -122,6 +130,10 @@
 		<button class="ml-8 cursor-pointer text-white" onclick={() => copyArray()}>
 			🪄 to Array
 		</button>
+		<label for="exportOpacity" class="ml-8">
+			<input type="checkbox" name="exportOpacity" id="exportOpacity" bind:checked={exportOpacity}>
+			<span class="ml-1">Opacity</span>
+		</label>
 	</div>
 </div>
 
