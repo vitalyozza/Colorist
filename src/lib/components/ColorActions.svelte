@@ -8,10 +8,12 @@
 
 		let allLines = '';
 
+		let colorName = color.getSanitizeColorName()
+
 		color.tints.forEach((tint) => {
-			allLines = allLines + `	` + tint.toCSSVariable("oklch", color.getSanitizeColorName()) + `\n`;
+			allLines = allLines + `	` + tint.toCSSVariable("oklch", colorName) + `\n`;
 			tint.semitransparents.forEach((semi) => {
-				allLines = allLines + `	` + semi.toCSSVariable("oklch", color.getSanitizeColorName()) + `\n`;
+				allLines = allLines + `	` + semi.toCSSVariable("oklch", colorName) + `\n`;
 			});
 		});
 
@@ -19,25 +21,17 @@
 	};
 
 	let copyFigmaCode = (color) => {
-		// if (!color.tints && color.tints.length > 0) return '';
-		// let prefix = `/* Collection name: Generated Palettes */`;
-		// let suffix = `/* ${color.getColorName()} = ${color.toCSSValue()} */`;
-
-		// const variables = color.tints
-		// 	.map((tint) => {
-		// 		return `    ${tint.toCSSVariable('hex', color.getSanitizeColorName())}`;
-		// 	})
-		// 	.join('\n');
-
-		// console.log(`${prefix}\n:root {\n${variables}\n\n${suffix}\n}`);
+		
 		let prefix = `/* Collection name: Generated Palettes */`;
 
 		let allLines = '';
 
+		let colorName = color.getSanitizeColorName()
+
 		color.tints.forEach((tint) => {
-			allLines = allLines + `	` + tint.toCSSVariable("hex", color.getSanitizeColorName()) + `\n`;
+			allLines = allLines + `	` + tint.toCSSVariable("hex", colorName) + `\n`;
 			tint.semitransparents.forEach((semi) => {
-				allLines = allLines + `	` + semi.toCSSVariable("hex", color.getSanitizeColorName()) + `\n`;
+				allLines = allLines + `	` + semi.toCSSVariable("hex", colorName) + `\n`;
 			});
 		});
 
@@ -47,10 +41,12 @@
 	let copyArrayCode = (color) => {
 		let allLines = '';
 
+		let colorName = color.getSanitizeColorName()
+
 		color.tints.forEach((tint) => {
-			allLines = allLines + `	` + tint.toArrayItem("oklch", color.getSanitizeColorName()) + `\n`;
+			allLines = allLines + `	` + tint.toArrayItem("oklch", colorName) + `\n`;
 			tint.semitransparents.forEach((semi) => {
-				allLines = allLines + `	` + semi.toArrayItem("oklch", color.getSanitizeColorName()) + `\n`;
+				allLines = allLines + `	` + semi.toArrayItem("oklch", colorName) + `\n`;
 			});
 		});
 
@@ -125,7 +121,6 @@
 							<div
 								class="h-8 w-auto rounded-lg shadow-md"
 								style="background-color: {tint.toCSSValue()}"
-								title={tint.getCSSVariableName(selectedColor.getSanitizeColorName())}
 							></div>
 						{/each}
 					</div>

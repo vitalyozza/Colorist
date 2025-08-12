@@ -1,18 +1,24 @@
 <script lang="ts">
-    let { colors = $bindable(), paletteLength = $bindable(), hueRange = $bindable(), exportOpacity = $bindable() } = $props()
+	let {
+		colors = $bindable(),
+		paletteLength = $bindable(),
+		hueRange = $bindable(),
+		exportOpacity = $bindable()
+	} = $props();
 
-    let copyCSSCode = () => {
+	let copyCSSCode = () => {
 		let prefix = `/* Collection name: Generated Palettes */`;
 
 		let allLines = '';
 
 		colors.forEach((color) => {
+			const colorName = color.getSanitizeColorName();
+
 			color.tints.forEach((tint) => {
-				allLines = allLines + `	` + tint.toCSSVariable('oklch', color.getSanitizeColorName()) + `\n`;
+				allLines = allLines + `	` + tint.toCSSVariable('oklch', colorName) + `\n`;
 				if (exportOpacity) {
 					tint.semitransparents.forEach((semi) => {
-						allLines =
-							allLines + `	` + semi.toCSSVariable('oklch', color.getSanitizeColorName()) + `\n`;
+						allLines = allLines + `	` + semi.toCSSVariable('oklch', colorName) + `\n`;
 					});
 				}
 			});
@@ -27,12 +33,13 @@
 		let allLines = '';
 
 		colors.forEach((color) => {
+			const colorName = color.getSanitizeColorName();
+
 			color.tints.forEach((tint) => {
-				allLines = allLines + `	` + tint.toCSSVariable('hex', color.getSanitizeColorName()) + `\n`;
+				allLines = allLines + `	` + tint.toCSSVariable('hex', colorName) + `\n`;
 				if (exportOpacity) {
 					tint.semitransparents.forEach((semi) => {
-						allLines =
-							allLines + `	` + semi.toCSSVariable('hex', color.getSanitizeColorName()) + `\n`;
+						allLines = allLines + `	` + semi.toCSSVariable('hex', colorName) + `\n`;
 					});
 				}
 			});
@@ -45,12 +52,13 @@
 		let allLines = '';
 
 		colors.forEach((color) => {
+			const colorName = color.getSanitizeColorName();
+
 			color.tints.forEach((tint) => {
-				allLines = allLines + `	` + tint.toArrayItem('oklch', color.getSanitizeColorName()) + `\n`;
+				allLines = allLines + `	` + tint.toArrayItem('oklch', colorName) + `\n`;
 				if (exportOpacity) {
 					tint.semitransparents.forEach((semi) => {
-						allLines =
-							allLines + `	` + semi.toArrayItem('oklch', color.getSanitizeColorName()) + `\n`;
+						allLines = allLines + `	` + semi.toArrayItem('oklch', colorName) + `\n`;
 					});
 				}
 			});
@@ -103,7 +111,7 @@
 </div>
 
 <style>
-    .header-section {
+	.header-section {
 		display: flex;
 		justify-content: start;
 		align-items: center;

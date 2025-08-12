@@ -1,4 +1,5 @@
 <script lang="ts">
+    import ColorUnit from "./ColorUnit.svelte";
 
     let { color = $bindable(), selected = $bindable(null) } = $props();
 
@@ -17,16 +18,11 @@
         <span>H{color.hue} </span><br><span class="truncate">{color.getColorName()}</span>
     </div>
     <div class="color-units">
-        {#each color.tints as tint}
-            <div class="color-unit" style="background: {tint.toCSSValue()}" 
-                onclick={() => selectColor(tint)}
-            >
-                <span class={ tint.lightness < 55 ? "text-white" : ""}>
-                    l: {tint.lightness.toFixed(2)} <br>
-                    c: {tint.chroma.toFixed(2)} <br>
-                    a: {tint.alpha}
-                </span>
-            </div>
+        {#each color.tints as tint, index}
+            <ColorUnit
+                color={color.tints[index]}
+                bind:selected={selected}
+            ></ColorUnit>
         {/each}
     </div>
 </div>
@@ -70,24 +66,6 @@
         display: flex;
         flex-direction: column;
         height: 100%;
-    }
-
-    .color-unit {
-        flex: 1;
-		display: flex;
-		justify-content: start;
-        padding: 12px;
-        font-size: 10px;
-		align-items: end;
-		background-color: #f0f0f0;
-        border: 1px solid #f0f0f020;
-        cursor: pointer;
-        transition: border ease-in-out 0.2s;
-    }
-
-    .color-unit:hover {
-        border: 1px solid #f0f0f0;
-        transition: border ease-in-out 0.2s;
     }
     
 </style>
