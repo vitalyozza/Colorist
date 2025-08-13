@@ -1,9 +1,12 @@
 import { oklch, formatHex8, formatHex } from 'culori';
+import {v4 as uuidv4} from 'uuid';
 import nearestColor from 'nearest-color';
 import { colornames } from 'color-name-list';
 
 export class OKLCHColor {
+	id: string
 	name: string = "Unknown Color"
+	namespace: string = null
 	lightness: number;
 	chroma: number;
 	hue: number;
@@ -25,8 +28,11 @@ export class OKLCHColor {
             generateTints?: boolean,
             generateShades?: boolean,
             generateSemitransparent?: boolean
+			namespace?: string
 		} = {}
 	) {
+
+		this.id = uuidv4()
 		
 		const {
             paletteLength = 10,
@@ -107,7 +113,7 @@ export class OKLCHColor {
 					chroma,
 					hue: this.hue
 				}, {
-					generateSemitransparent: true
+					generateSemitransparent: true,
 				})
 			);
 			
@@ -119,12 +125,13 @@ export class OKLCHColor {
 		return Array.from({ length: this.paletteLength }, (_, step) => {
 			const lightness = 50 - (step / (this.paletteLength - 1)) * 40; // От 50% до 10%
 			const chroma = this.calculateChroma(step, false);
-
 			let generatedColor = $state(
 				new OKLCHColor({
 					lightness,
 					chroma,
 					hue: this.hue
+				}, {
+					generateSemitransparent: true,
 				})
 			);
 			

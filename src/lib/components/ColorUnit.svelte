@@ -1,16 +1,18 @@
 <script lang="ts">
-	let { color, selected = $bindable(null) } = $props();
+	let { color, selectedColor = $bindable(null), selectedColorSpector = $bindable() } = $props();
 
     function selectColor(color) {
-        selected = color
+        selectedColor = color
+        selectedColorSpector = null
 	}
 
 </script>
 
 <div 
-    class="color-unit" 
+    class="color-unit"
     style="background: {color.toCSSValue()}" 
     onclick={() => selectColor(color)}
+    class:selected={color?.id == selectedColor?.id}
     class:light-border={color.lightness < 50}
     class:dark-border={color.lightness > 50}
 >
@@ -30,7 +32,9 @@
 		align-items: end;
 		background-color: #f0f0f0;
         cursor: pointer;
-        transition: border ease-in-out 0.2s;
+        /* outline: 1px solid transparent;
+        outline-offset: -1px; */
+        transition: all ease-out 0.2s;
     }
 
     .light-border {
@@ -46,6 +50,11 @@
     }
 
     .dark-border:hover {
-        border: 1px solid #00000050;
+        border: 1px solid #00000070;
+    }
+
+    .selected, .selected:hover {
+        outline: 2px solid #ffffff;
+        outline-offset: -2px;
     }
 </style>

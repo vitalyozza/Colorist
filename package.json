@@ -40,6 +40,7 @@
 		"vitest-browser-svelte": "^0.1.0"
 	},
 	"dependencies": {
+		"@lucide/svelte": "^0.539.0",
 		"clipboard": "^2.0.11",
 		"color-name-list": "^11.24.0",
 		"colorizr": "^3.0.8",
