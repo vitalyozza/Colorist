@@ -1,10 +1,11 @@
 <script>
 	import { slide } from 'svelte/transition';
     import { Copy } from '@lucide/svelte';
-	let { selectedColor = $bindable() } = $props();
+	let { selectedColor = $bindable(), relatedColorSpector = $bindable(), selectedColorSpector = $bindable() } = $props();
 
-    let colorName = $derived(selectedColor.getSanitizeColorName())
+	let colorName = $derived(selectedColor.getSanitizeColorName())
     let colorCSSValue = $derived(selectedColor.toCSSValue())
+    let colorCSSVariableName = $derived(selectedColor.getCSSVariableName(relatedColorSpector.getSanitizeColorName()))
 
 </script>
 
@@ -18,7 +19,7 @@
 				></div>
 				<div class="flex-grow overflow-hidden">
 					<div class="mb-1 truncate font-mono text-xs text-white">
-						<b>{selectedColor.getCSSVariableName()}</b>
+						<b>{colorCSSVariableName}</b>
 					</div>
 					<div class="truncate font-mono text-xs text-white opacity-50">
 						{colorCSSValue}
@@ -26,7 +27,7 @@
 				</div>
 				<button
 					class="group cursor-pointer rounded-full p-2 text-white transition-colors hover:bg-neutral-700/50"
-					onclick={() => console.log(selectedColor.toCSSVariable())}
+					onclick={() => console.log(selectedColor.toCSSVariable("oklch", relatedColorSpector.getSanitizeColorName()))}
 				>
 					<Copy/>
 				</button>

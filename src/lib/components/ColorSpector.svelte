@@ -1,20 +1,28 @@
 <script lang="ts">
 	import ColorUnit from './ColorUnit.svelte';
 
-	let { color = $bindable(), selectedColor = $bindable() ,selectedColorSpector = $bindable(null) } = $props();
+	let {
+		color = $bindable(),
+		selectedColor = $bindable(),
+		selectedColorSpector = $bindable(null),
+		relatedColorSpector = $bindable()
+	} = $props();
 
-    let colorName = $derived(color.getColorName())
+	let colorName = $derived(color.getColorName());
 
 	function selectColorSpector(color) {
 		selectedColorSpector = color;
-        selectedColor = null
+		selectedColor = null;
+	}
+
+	function selectColor(color, tint) {
+		selectedColor = tint
+		selectedColorSpector = null
+		relatedColorSpector = color;
 	}
 </script>
 
-<div 
-    class="color-spector font-mono"
-    class:selected={color?.id == selectedColorSpector?.id}
->
+<div class="color-spector font-mono" class:selected={color?.id == selectedColorSpector?.id}>
 	<div class="details" title={colorName} onclick={() => selectColorSpector(color)}>
 		<div class="cover" style:background-color={color.toCSSValue()}></div>
 		<span>H{color.hue} </span><br />
@@ -22,11 +30,13 @@
 	</div>
 	<div class="units">
 		{#each color.tints as tint, index}
-			<ColorUnit 
-                color={color.tints[index]} 
-                bind:selectedColor
-                bind:selectedColorSpector
-            ></ColorUnit>
+				<ColorUnit
+					onSelect={() => selectColor(color, tint)}
+					color={color.tints[index]}
+					bind:selectedColor
+					bind:selectedColorSpector
+					bind:relatedColorSpector
+				></ColorUnit>
 		{/each}
 	</div>
 </div>
@@ -59,7 +69,7 @@
 	}
 
 	.color-spector .cover {
-        flex-shrink: 0;
+		flex-shrink: 0;
 		width: 8px;
 		height: 8px;
 		border-radius: 8px;
@@ -72,20 +82,22 @@
 		height: 100%;
 	}
 
-    .selected, .selected:hover {
-        outline: 2px solid white;
-        outline-offset: -2px;
-    }
+	.selected,
+	.selected:hover {
+		outline: 2px solid white;
+		outline-offset: -2px;
+		border-radius: 5px;
+	}
 
-    .selected:last-child {
-        border-radius: 0px 8px 8px 0px;
-    }
+	.selected:last-child {
+		border-radius: 0px 8px 8px 0px;
+	}
 
-    .selected:first-child {
-        border-radius: 8px 0px 0px 8px;
-    }
+	.selected:first-child {
+		border-radius: 8px 0px 0px 8px;
+	}
 
-    .selected .details {
-        color: white;
-    }
+	.selected .details {
+		color: white;
+	}
 </style>

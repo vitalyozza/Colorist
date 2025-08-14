@@ -1,7 +1,7 @@
 <script>
 	import { slide } from 'svelte/transition';
 	import { Copy } from '@lucide/svelte';
-	let { selectedColorSpector = $bindable() } = $props();
+	let { selectedColorSpector = $bindable(), globals = $bindable() } = $props();
 
 	let color = $derived(selectedColorSpector);
 	let colorName = $derived(selectedColorSpector.getSanitizeColorName());
@@ -15,9 +15,11 @@
 
 		color.tints.forEach((tint) => {
 			allLines = allLines + `	` + tint.toCSSVariable('oklch', colorName) + `\n`;
-			tint.semitransparents.forEach((semi) => {
-				allLines = allLines + `	` + semi.toCSSVariable('oklch', colorName) + `\n`;
-			});
+			if (globals.enableOpacity) {
+				tint.semitransparents.forEach((semi) => {
+					allLines = allLines + `	` + semi.toCSSVariable('oklch', colorName) + `\n`;
+				});
+			}
 		});
 
 		console.log(`${prefix}\n:root {\n${allLines}\n}`);
@@ -30,9 +32,11 @@
 
 		color.tints.forEach((tint) => {
 			allLines = allLines + `	` + tint.toCSSVariable('hex', colorName) + `\n`;
-			tint.semitransparents.forEach((semi) => {
-				allLines = allLines + `	` + semi.toCSSVariable('hex', colorName) + `\n`;
-			});
+			if (globals.enableOpacity) {
+				tint.semitransparents.forEach((semi) => {
+					allLines = allLines + `	` + semi.toCSSVariable('hex', colorName) + `\n`;
+				});
+			}
 		});
 
 		console.log(`${prefix}\n:root {\n${allLines}\n}`);
@@ -43,9 +47,11 @@
 
 		color.tints.forEach((tint) => {
 			allLines = allLines + `	` + tint.toArrayItem('oklch', colorName) + `\n`;
-			tint.semitransparents.forEach((semi) => {
-				allLines = allLines + `	` + semi.toArrayItem('oklch', colorName) + `\n`;
-			});
+			if (globals.enableOpacity) {
+				tint.semitransparents.forEach((semi) => {
+					allLines = allLines + `	` + semi.toArrayItem('oklch', colorName) + `\n`;
+				});
+			}
 		});
 
 		console.log(allLines);

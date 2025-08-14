@@ -40,21 +40,22 @@
 
 	let selectedColor = $state(null);
 	let selectedColorSpector = $state(null);
+	let relatedColorSpector = $state(null);
 </script>
 
 {#if selectedColor}
-	<ColorUnitActions bind:selectedColor />
+	<ColorUnitActions bind:selectedColor bind:relatedColorSpector bind:selectedColorSpector />
 {/if}
 
 {#if selectedColorSpector}
-	<ColorSpectorActions bind:selectedColorSpector />
+	<ColorSpectorActions bind:selectedColorSpector bind:globals />
 {/if}
 
 <div class="page">
 	<div class="colors-area">
 		<div class="colors">
 			{#each colors as color}
-				<ColorSpector {color} bind:selectedColor bind:selectedColorSpector />
+				<ColorSpector {color} bind:selectedColor bind:selectedColorSpector bind:relatedColorSpector />
 			{/each}
 		</div>
 	</div>
