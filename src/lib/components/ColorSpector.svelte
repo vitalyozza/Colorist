@@ -1,28 +1,24 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import ColorUnit from './ColorUnit.svelte';
 
-	let {
-		color = $bindable(),
-		selectedColor = $bindable(),
-		selectedColorSpector = $bindable(null),
-		relatedColorSpector = $bindable()
-	} = $props();
-
+	let {color = $bindable()} = $props();
+	let globals = getContext('globals')
 	let colorName = $derived(color.getColorName());
 
 	function selectColorSpector(color) {
-		selectedColorSpector = color;
-		selectedColor = null;
+		globals.selected.spector = color;
+		globals.selected.color = null;
 	}
 
 	function selectColor(color, tint) {
-		selectedColor = tint
-		selectedColorSpector = null
-		relatedColorSpector = color;
+		globals.selected.color = tint
+		globals.selected.spector = null
+		globals.related.color = color;
 	}
 </script>
 
-<div class="color-spector font-mono" class:selected={color?.id == selectedColorSpector?.id}>
+<div class="color-spector font-mono" class:selected={color?.id == globals.selected.spector?.id}>
 	<div class="details" title={colorName} onclick={() => selectColorSpector(color)}>
 		<div class="cover" style:background-color={color.toCSSValue()}></div>
 		<span>H{color.hue} </span><br />
@@ -33,9 +29,6 @@
 				<ColorUnit
 					onSelect={() => selectColor(color, tint)}
 					color={color.tints[index]}
-					bind:selectedColor
-					bind:selectedColorSpector
-					bind:relatedColorSpector
 				></ColorUnit>
 		{/each}
 	</div>

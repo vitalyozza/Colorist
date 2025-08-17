@@ -1,12 +1,14 @@
 <script>
 	import { slide } from 'svelte/transition';
 	import { Copy } from '@lucide/svelte';
-	let { selectedColorSpector = $bindable(), globals = $bindable() } = $props();
+	import { getContext } from 'svelte';
 
-	let color = $derived(selectedColorSpector);
-	let colorName = $derived(selectedColorSpector.getSanitizeColorName());
-	let colorCSSValue = $derived(selectedColorSpector.toCSSValue());
-	let colorVariableName = $derived(selectedColorSpector.getCSSVariableName());
+	let globals = getContext('globals')
+
+	let color = $derived(globals.selected.spector);
+	let colorName = $derived(globals.selected.spector.getSanitizeColorName());
+	let colorCSSValue = $derived(globals.selected.spector.toCSSValue());
+	let colorVariableName = $derived(globals.selected.spector.getCSSVariableName());
 
 	let copyCSSCode = () => {
 		let prefix = `/* Collection name: Generated Palettes */`;
@@ -58,7 +60,7 @@
 	};
 </script>
 
-{#key selectedColorSpector}
+{#key globals.selected.spector}
 	<div in:slide out:slide class="fixed bottom-16 left-1/2 z-50 w-100 -translate-x-1/2">
 		<div class="relative space-y-4 rounded-xl bg-neutral-900/95 p-4 shadow-xl backdrop-blur-xl">
 			<div class="flex items-center space-x-3">
@@ -73,7 +75,7 @@
 				</div>
 				<button
 					class="group cursor-pointer rounded-full p-2 text-white transition-colors hover:bg-neutral-700/50"
-					onclick={() => console.log(selectedColorSpector.toCSSVariable())}
+					onclick={() => console.log(globals.selected.spector.toCSSVariable())}
 				>
 					<Copy />
 				</button>
@@ -84,26 +86,26 @@
 					<div>
 						<button
 							class="group rounded-md px-2 py-1 text-xs text-white transition-colors hover:bg-neutral-700/50"
-							onclick={() => copyFigmaCode(selectedColorSpector)}
+							onclick={() => copyFigmaCode(globals.selected.spector)}
 						>
 							<span class="cursor-pointer opacity-70 group-hover:text-white">🪄 Figma</span>
 						</button>
 						<button
 							class="group rounded-md px-2 py-1 text-xs text-white transition-colors hover:bg-neutral-700/50"
-							onclick={() => copyCSSCode(selectedColorSpector)}
+							onclick={() => copyCSSCode(globals.selected.spector)}
 						>
 							<span class="cursor-pointer opacity-70 group-hover:text-white">🪄 CSS</span>
 						</button>
 						<button
 							class="group rounded-md px-2 py-1 text-xs text-white transition-colors hover:bg-neutral-700/50"
-							onclick={() => copyArrayCode(selectedColorSpector)}
+							onclick={() => copyArrayCode(globals.selected.spector)}
 						>
 							<span class="cursor-pointer opacity-70 group-hover:text-white">🪄 Array</span>
 						</button>
 					</div>
 				</div>
 				<div class="grid grid-cols-6 gap-2">
-					{#each selectedColorSpector.tints as tint}
+					{#each globals.selected.spector.tints as tint}
 						<div
 							class="h-8 w-auto rounded-lg shadow-md"
 							style="background-color: {tint.toCSSValue()}"

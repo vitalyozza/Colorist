@@ -5,14 +5,24 @@
 	import ColorUnitActions from '$lib/components/ColorUnitActions.svelte';
 	import ColorSpectorActions from '$lib/components/ColorSpectorActions.svelte';
 	import { OKLCHColor } from '$lib/classes/OKLCHColor/index.svelte';
+	import { setContext } from 'svelte'
 	
 	let globals = $state({
 		enableOpacity: false,
 		palette: {
 			range: 10,
 			length: 10
+		},
+		selected: {
+			color: null,
+			spector: null
+		},
+		related: {
+			color: null
 		}
 	})
+
+	setContext('globals', globals)
 
 	let generatedColors = $derived.by(() => {
 		const result: string[] = [];
@@ -38,29 +48,26 @@
 		)
 	);
 
-	let selectedColor = $state(null);
-	let selectedColorSpector = $state(null);
-	let relatedColorSpector = $state(null);
 </script>
 
-{#if selectedColor}
-	<ColorUnitActions bind:selectedColor bind:relatedColorSpector bind:selectedColorSpector />
+{#if globals.selected.color}
+	<ColorUnitActions />
 {/if}
 
-{#if selectedColorSpector}
-	<ColorSpectorActions bind:selectedColorSpector bind:globals />
+{#if globals.selected.spector}
+	<ColorSpectorActions />
 {/if}
 
 <div class="page">
 	<div class="colors-area">
 		<div class="colors">
 			{#each colors as color}
-				<ColorSpector {color} bind:selectedColor bind:selectedColorSpector bind:relatedColorSpector />
+				<ColorSpector {color} />
 			{/each}
 		</div>
 	</div>
 	<div class="info-area">
-		<SidePanel bind:colors bind:globals></SidePanel>
+		<SidePanel bind:colors ></SidePanel>
 	</div>
 </div>
 

@@ -1,6 +1,9 @@
 <script lang="ts">
     import Header from "./Header.svelte";
-	let { colors = $bindable(), globals = $bindable() } = $props();
+	import { getContext } from "svelte";
+	let { colors = $bindable() } = $props();
+	
+	let globals = getContext('globals')
 
     let copyCSSCode = () => {
 		let prefix = `/* Collection name: Generated Palettes */`;

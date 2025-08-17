@@ -1,17 +1,17 @@
 <script lang="ts">
-	let {
-		color,
-		selectedColor = $bindable(null),
-		selectedColorSpector = $bindable(),
-        onSelect = $bindable(() => {})
-	} = $props();
+	import { getContext } from "svelte";
+
+	let {color, onSelect = $bindable(() => {})} = $props();
+
+	let globals = getContext('globals')
+
 </script>
 
 <div
 	class="color-unit"
 	style="background: {color.toCSSValue()}"
 	onclick={onSelect}
-	class:selected={color?.id == selectedColor?.id}
+	class:selected={color?.id == globals.selected.color?.id}
 	class:light-border={color.lightness < 50}
 	class:dark-border={color.lightness > 50}
 >
